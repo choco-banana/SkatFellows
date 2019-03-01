@@ -8,7 +8,7 @@
 		$pass = 'cbb48';
 		$name = 'SkatFellows';
 		$charset = 'utf8'; // Zeichenkodierung
-		$mysqli = mysqli_connect($host, $user, $pass, $name);		
+		$mysqli = new mysqli($host, $user, $pass, $name);		
 		return $mysqli;
 	}
 ?>

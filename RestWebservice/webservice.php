@@ -17,6 +17,7 @@ if(isset($_GET['cmd']))
 	}
 	else
 	{
+		$_SERVER['PHP_AUTH_USER'] = 'appadmin';
 		switch($cmd)
 		{
 			case 'getF':
@@ -98,27 +99,38 @@ function DBGetFellows($mysqli)
 
 function DBAddFellow($mName, $mysqli)
 {
-	//Insert new contact into database
-	$query1 = "INSERT INTO `fellows` (`Name`) VALUES ('".$mName."')";
-
-	//Execute query1
-	$stmt = $mysqli->query($query1);
-	
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 1 Failed';	
+	//Prepare INSERT
+	if (!($stmt = $mysqli->prepare("INSERT INTO `fellows` (`Name`) VALUES (?)")))
+	{
+		echo "Prepare 1 failed: (" . $mysqli->errno . ") " . $mysqli->error;
 	}
-
-	//Get new contact info from database
-	$query2 = "SELECT ID,Name FROM `fellows` WHERE `Name`='".$mName."'";
-
-	//Execute query2
-	$result = $mysqli->query($query2);
-	
-	if (!$result)
-	{	//The query failed
-		echo 'Query 2 Failed';
+	//Bind
+	if (!$stmt->bind_param("s", $mName))
+	{
+		echo "Binding 1 parameters failed: (" . $stmt->errno . ") " . $stmt->error;
 	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute 1 failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	
+	
+	//Prepare SELECT
+	if (!($stmt = $mysqli->prepare("SELECT ID,Name FROM `fellows` WHERE `Name`=?")))
+	{
+		echo "Prepare 2 failed: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	//Bind
+	if (!$stmt->bind_param("s", $mName))
+	{
+		echo "Binding 2 parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute 2 failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	
+	$result = $stmt->get_result();
 	
 	//Return new Fellow and ID
 	$row = $result->fetch_assoc();
@@ -128,27 +140,37 @@ function DBAddFellow($mName, $mysqli)
 
 function DBChangeFellow($mID, $mName, $mysqli)
 {
-	// Change the Name of this Fellow
-	$query1 = "UPDATE `fellows` SET `Name`='".$mName."' WHERE `ID`='".$mID."'";
-	
-	//Execute query1
-	$stmt = $mysqli->query($query1);
-	
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 1 Failed';	
+	//Prepare UPDATE
+	if (!($stmt = $mysqli->prepare("UPDATE `fellows` SET `Name`=? WHERE  `ID`=?")))
+	{
+		echo "Prepare 1 failed: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	//Bind
+	if (!$stmt->bind_param("si", $mName, $mID))
+	{
+		echo "Binding 1 parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute 1 failed: (" . $stmt->errno . ") " . $stmt->error;
 	}
 	
-	//Get new contact info from database
-	$query2 = "SELECT ID,Name FROM `fellows` WHERE `Name`='".$mName."'";
-
-	//Execute query2
-	$result = $mysqli->query($query2);
-	
-	if (!$result)
-	{	//The query failed
-		echo 'Query 2 Failed';	
+	//Prepare SELECT
+	if (!($stmt = $mysqli->prepare("SELECT ID,Name FROM `fellows` WHERE `Name`=?")))
+	{
+		echo "Prepare 2 failed: (" . $mysqli->errno . ") " . $mysqli->error;
 	}
+	//Bind
+	if (!$stmt->bind_param("s", $mName))
+	{
+		echo "Binding 2 parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute 2 failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	
+	$result = $stmt->get_result();
 	
 	//Return new Fellow and ID
 	$row = $result->fetch_assoc();
@@ -156,41 +178,42 @@ function DBChangeFellow($mID, $mName, $mysqli)
 	file_put_contents('php://output',$jsonpost);
 }
 
-function DBRemoveFellow($mID, $mysqli)
+function DBRemoveFellow($mPID, $mysqli)
 {
-	//Insert new game into database
-	$query1 = "SET @PID = (SELECT ID FROM `fellows` WHERE `ID`='".$mID."');";
-	
-	//Execute query
-	$stmt = $mysqli->query($query1);
-
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 1 Failed';	
+	//Prepare DELETE
+	if (!($stmt = $mysqli->prepare("DELETE FROM `games` WHERE `PlayerID`=?")))
+	{
+		echo "Prepare 1 failed: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	//Bind
+	if (!$stmt->bind_param("i",$mPID))
+	{
+		echo "Binding 1 parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute 1 failed: (" . $stmt->errno . ") " . $stmt->error;
 	}
 	
-	$query2 = "DELETE FROM `games` WHERE `PlayerID`=@PID;";
-	//Execute query
-	$stmt = $mysqli->query($query2);
-
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 2 Failed';	
+	//Prepare DELETE
+	if (!($stmt = $mysqli->prepare("DELETE FROM `fellows` WHERE `ID`=?")))
+	{
+		echo "Prepare 2 failed: (" . $mysqli->errno . ") " . $mysqli->error;
 	}
-	
-	$query3 = "DELETE FROM `fellows` WHERE `ID`=@PID;";
-	//Execute query
-	$stmt = $mysqli->query($query3);
-
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 3 Failed';	
+	//Bind
+	if (!$stmt->bind_param("i",$mPID))
+	{
+		echo "Binding 2 parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute 2 failed: (" . $stmt->errno . ") " . $stmt->error;
 	}
 }
 
 function DBGetGames($mysqli)
 {
-	//The query succeeded, now echo back the new contact ID
+	
 	$query = "SELECT * FROM `games`";
 	$result = $mysqli->query($query);
 	if (!$result)
@@ -206,13 +229,21 @@ function DBGetGames($mysqli)
 
 function DBGetGamesOfFellow($mPID,$mysqli)
 {
-	//The query succeeded, now echo back the new contact ID
-	$query = "SELECT * FROM `games` WHERE `PlayerID`='" .$mPID. "'; ";
-	$result = $mysqli->query($query);
-	if (!$result)
-	{	//The query failed
-		echo 'Query Failed';	
+	//Prepare SELECT
+	if (!($stmt = $mysqli->prepare("SELECT * FROM `games` WHERE `PlayerID`=?")))
+	{
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
 	}
+	//Bind
+	if (!$stmt->bind_param("i",$mPID))
+	{
+		echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	if (!$stmt->execute()) {
+		echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	
+	$result = $stmt->get_result();
 	
 	file_put_contents('php://output',"[");
 	if($row = $result->fetch_assoc())
@@ -229,85 +260,83 @@ function DBGetGamesOfFellow($mPID,$mysqli)
 
 function DBAddGame($mPlayerID, $mScore, $mysqli)
 {
-	$query1 = "INSERT INTO `games` (`PlayerID`, `Score`) VALUES ('".$mPlayerID."','".$mScore."');";
-	//Execute query
-	$stmt = $mysqli->query($query1);
-
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 1 Failed';	
+	//Prepare INSERT
+	if (!($stmt = $mysqli->prepare("INSERT INTO `games` (`PlayerID`, `Score`) VALUES (?,?)")))
+	{
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
 	}
+	// Bind
+	if (!$stmt->bind_param("is", $mPlayerID, $mScore))
+	{
+		echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	
+	if (!$stmt->execute()) {
+		echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+
 }
 
 function DBRemoveGame($mID, $mysqli)
 {
-	//Insert new game into database
-	$query1 = "DELETE FROM `games` WHERE `ID`='" .$mID. "';";
-	
-	//Execute query
-	$stmt = $mysqli->query($query1);
-	
-	if (!$stmt)
-	{	//The query failed
-		echo 'Query 1 Failed';
+	//Prepare DELETE
+	if (!($stmt = $mysqli->prepare("DELETE FROM `games` WHERE `ID`=?")))
+	{
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	//Bind
+	if (!$stmt->bind_param("i", $mID))
+	{
+		echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
 	}
 }
 
 function DBGetScoringTable($mysqli)
 {
-	//Insert new game into database
-	$query1 = "SELECT * FROM `fellows`;";
-	//Execute query
-	$result1 = $mysqli->query($query1);
-
-	if (!$result1)
-	{	//The query failed
-		echo 'Query 1 Failed';	
+	//Prepare DELETE
+	if (!($stmt = $mysqli->prepare("SELECT * FROM `fellows`")))
+	{
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+	}
+	//Execute
+	if (!$stmt->execute()) {
+		echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
 	}
 	else{
+		$result1 = $stmt->get_result();
+		$rowsDone = 0;
+		
 		file_put_contents('php://output',"[");
-		if($row1 = $result1->fetch_assoc()) {
+		while ($rowsDone < $result1->num_rows) {
 
-			$query2 = "SELECT * FROM `games` WHERE `PlayerID`='" . $row1['ID'] . "' AND `Date` >= TIMESTAMPADD(HOUR,-8,CURRENT_TIMESTAMP);";
-			//Execute query
-			$result2 = $mysqli->query($query2);
-		
-			if (!$result2)
-			{	//The query failed
-				echo 'Query 2 Failed';	
-			}
-			else
-			{
-				$sum = 0;
-				$count = 0;
-				while($row2 = $result2->fetch_assoc())
-				{
-					$sum += $row2['Score'];
-					$count += 1;
-				}
-			}
-			$row1['Score'] = $sum;
-			$row1['Games'] = $count;
+			$row1 = $result1->fetch_assoc();
 			
-			$jsonpost = json_encode($row1);
-			file_put_contents('php://output', $jsonpost);
-		}
-		while ($row1 = $result1->fetch_assoc()) {
-
-			$query2 = "SELECT * FROM `games` WHERE `PlayerID`='" . $row1['ID'] . "' AND `Date` >= TIMESTAMPADD(HOUR,-8,CURRENT_TIMESTAMP);";
-			//Execute query
-			$result2 = $mysqli->query($query2);
-		
-			if (!$result2)
-			{	//The query failed
-				echo 'Query 2 Failed';	
+			//Prepare SELECT
+			if (!($stmt = $mysqli->prepare("SELECT * FROM `games` WHERE `PlayerID`=? AND `Date` >= TIMESTAMPADD(HOUR,-8,CURRENT_TIMESTAMP)")))
+			{
+				echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+			}
+			//Bind
+			if (!$stmt->bind_param("i", $row1['ID']))
+			{
+				echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+			}
+			//Execute
+			if (!$stmt->execute()) {
+				echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
 			}
 			else
 			{
+				$result2 = $stmt->get_result();
 				$sum = 0;
 				$count = 0;
-				while($row2 = $result2->fetch_assoc())
+				while($count < $result2->num_rows)
 				{
+					$row2 = $result2->fetch_assoc();
 					$sum += $row2['Score'];
 					$count += 1;
 				}
@@ -317,7 +346,13 @@ function DBGetScoringTable($mysqli)
 			$row1['Median'] = 0;
 			
 			$jsonpost = json_encode($row1);
-			file_put_contents('php://output',"," . $jsonpost);
+			file_put_contents('php://output', $jsonpost);
+			
+			$rowsDone += 1;
+			if($rowsDone < $result1->num_rows)
+			{
+				file_put_contents('php://output',",");
+			}
 		}
 		file_put_contents('php://output',"]");
 	}
