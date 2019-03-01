@@ -23,22 +23,37 @@ if(isset($_GET['cmd']))
 				DBGetFellows($mysqli);
 				break;
 			case 'addF':
-				DBAddFellow($jsonpost->Name, $mysqli);
+				if($_SERVER['PHP_AUTH_USER'] == 'appadmin')
+				{
+				    DBAddFellow($jsonpost->Name, $mysqli);
+				}
 				break;
 			case 'chaF':
-				DBChangeFellow($jsonpost->ID, $jsonpost->Name, $mysqli);
+				if($_SERVER['PHP_AUTH_USER'] == 'appadmin')
+				{
+				    DBChangeFellow($jsonpost->ID, $jsonpost->Name, $mysqli);
+				}
 				break;
 			case 'remF':
-				DBRemoveFellow($jsonpost->ID, $mysqli);
+				if($_SERVER['PHP_AUTH_USER'] == 'appadmin')
+				{
+				    DBRemoveFellow($jsonpost->ID, $mysqli);
+				}
 				break;
 			case 'getG':
 				DBGetGames($mysqli);
+				break;
+			case 'getGoF':
+				DBGetGamesOfFellow($jsonpost->ID,$mysqli);
 				break;
 			case 'addG':
 				DBAddGame($jsonpost->PlayerID,$jsonpost->Score,$mysqli);
 				break;
 			case 'remG':
-				DBRemoveGame($jsonpost->ID,$mysqli);
+				if($_SERVER['PHP_AUTH_USER'] == 'appadmin')
+				{
+				    DBRemoveGame($jsonpost->ID,$mysqli);
+				}
 				break;
 			case 'getST':
 				DBGetScoringTable($mysqli);
@@ -67,6 +82,7 @@ function DBGetFellows($mysqli)
 	{	//The query failed
 		echo 'Query Failed';	
 	}
+	
 	file_put_contents('php://output',"[");
 	if($row = $result->fetch_assoc())
 	{
@@ -188,6 +204,29 @@ function DBGetGames($mysqli)
 	}
 }
 
+function DBGetGamesOfFellow($mPID,$mysqli)
+{
+	//The query succeeded, now echo back the new contact ID
+	$query = "SELECT * FROM `games` WHERE `PlayerID`='" .$mPID. "'; ";
+	$result = $mysqli->query($query);
+	if (!$result)
+	{	//The query failed
+		echo 'Query Failed';	
+	}
+	
+	file_put_contents('php://output',"[");
+	if($row = $result->fetch_assoc())
+	{
+		$jsonpost = json_encode($row);
+		file_put_contents('php://output',$jsonpost);
+	}
+	while ($row = $result->fetch_assoc()) {
+		$jsonpost = json_encode($row);
+		file_put_contents('php://output', "," . $jsonpost);
+	}
+	file_put_contents('php://output',"]");
+}
+
 function DBAddGame($mPlayerID, $mScore, $mysqli)
 {
 	$query1 = "INSERT INTO `games` (`PlayerID`, `Score`) VALUES ('".$mPlayerID."','".$mScore."');";
@@ -203,7 +242,7 @@ function DBAddGame($mPlayerID, $mScore, $mysqli)
 function DBRemoveGame($mID, $mysqli)
 {
 	//Insert new game into database
-	$query1 = "DELETE FROM `games` WHERE `ID`='".$mID."';";
+	$query1 = "DELETE FROM `games` WHERE `ID`='" .$mID. "';";
 	
 	//Execute query
 	$stmt = $mysqli->query($query1);
@@ -229,7 +268,7 @@ function DBGetScoringTable($mysqli)
 		file_put_contents('php://output',"[");
 		if($row1 = $result1->fetch_assoc()) {
 
-			$query2 = "SELECT * FROM `games` WHERE `PlayerID`='" . $row1['ID'] . "';";
+			$query2 = "SELECT * FROM `games` WHERE `PlayerID`='" . $row1['ID'] . "' AND `Date` >= TIMESTAMPADD(HOUR,-8,CURRENT_TIMESTAMP);";
 			//Execute query
 			$result2 = $mysqli->query($query2);
 		
@@ -240,19 +279,22 @@ function DBGetScoringTable($mysqli)
 			else
 			{
 				$sum = 0;
+				$count = 0;
 				while($row2 = $result2->fetch_assoc())
 				{
 					$sum += $row2['Score'];
+					$count += 1;
 				}
 			}
 			$row1['Score'] = $sum;
+			$row1['Games'] = $count;
 			
 			$jsonpost = json_encode($row1);
 			file_put_contents('php://output', $jsonpost);
 		}
 		while ($row1 = $result1->fetch_assoc()) {
 
-			$query2 = "SELECT * FROM `games` WHERE `PlayerID`='" . $row1['ID'] . "';";
+			$query2 = "SELECT * FROM `games` WHERE `PlayerID`='" . $row1['ID'] . "' AND `Date` >= TIMESTAMPADD(HOUR,-8,CURRENT_TIMESTAMP);";
 			//Execute query
 			$result2 = $mysqli->query($query2);
 		
@@ -263,12 +305,16 @@ function DBGetScoringTable($mysqli)
 			else
 			{
 				$sum = 0;
+				$count = 0;
 				while($row2 = $result2->fetch_assoc())
 				{
 					$sum += $row2['Score'];
+					$count += 1;
 				}
 			}
 			$row1['Score'] = $sum;
+			$row1['Games'] = $count;
+			$row1['Median'] = 0;
 			
 			$jsonpost = json_encode($row1);
 			file_put_contents('php://output',"," . $jsonpost);
