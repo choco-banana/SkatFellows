@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SkatFellows.EditGamePage"
+             Title="Edit Game">
+    <ContentPage.Content>
+        <StackLayout Margin="20" VerticalOptions="StartAndExpand">
+            <Label Text="ID:"/>
+            <Label Text="{Binding ID}"/>
+            <Label Text="Score:" />
+            <Entry Text="{Binding Path=Score}"/>
+            <Button Text="Save" Clicked="EditGame"/>
+            <Button Text="Delete" Clicked="DeleteGame"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SkatFellows.CurrentScorePage"
+             Title="tHiS tiME">
+    <ContentPage.Content>
+        <StackLayout Margin="10">
+            <DatePicker x:Name="startDatePicker"
+                    Format="D"
+                    Margin="30, 0, 0, 30"
+                    DateSelected="OnDateSelected" />
+            <ListView x:Name="listView" Margin="20" ItemSelected="OnItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="20,0,0,0" HorizontalOptions="StartAndExpand" Orientation="Horizontal">
+                                <Label Text="{Binding Name}" VerticalTextAlignment="Center" />
+                                <Label Text="{Binding Score}" VerticalTextAlignment="Center" />
+                                <Label Text="{Binding Games}" VerticalTextAlignment="Center" />
+                                <Label Text="{Binding Median}" VerticalTextAlignment="Center" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

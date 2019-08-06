@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SkatFellows.EditFellowPage"
+             Title="Edit Fellow">
+    <ContentPage.Content>
+        <StackLayout Margin="20" VerticalOptions="StartAndExpand">
+            <Label Text="ID:"/>
+            <Label Text="{Binding ID}"/>
+            <Label Text="Name:" />
+            <Entry Text="{Binding Path=Name}"/>
+            <StackLayout Orientation="Horizontal">
+                <Button Text="Save" Clicked="EditFellow"/>
+                <Button Text="Delete" Clicked="DeleteFellow"/>
+            </StackLayout>
+            <Label Text="Games:" />
+            <ListView x:Name="listView" Margin="20" ItemSelected="OnItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="20,0,0,0" HorizontalOptions="StartAndExpand" Orientation="Horizontal">
+                                <Label Text="{Binding ID}" VerticalTextAlignment="Center" />
+                                <Label Text="{Binding Date}" VerticalTextAlignment="Center" />
+                                <Label Text="{Binding Score}" VerticalTextAlignment="Center" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

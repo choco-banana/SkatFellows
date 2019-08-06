@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:SkatFellows"
+             x:Class="SkatFellows.MainPage"
+             Title="Skat Fellows">
+
+    <StackLayout  Margin="20" VerticalOptions="StartAndExpand">
+        <!-- Place new controls here -->
+        <Label Text="Welcome to SkatFellows" 
+           HorizontalOptions="Center" />
+        <Button Text="Fellows" HorizontalOptions="Center" Clicked="OnFellowsClicked"/>
+        <Button Text="Add Game" HorizontalOptions="Center" Clicked="OnGamesClicked"/>
+        <Button Text="Score" HorizontalOptions="Center" Clicked="OnOverallClicked"/>
+        <Button Text="Settings" HorizontalOptions="Center" Clicked="OnSettingsClicked"/>
+    </StackLayout>
+
+</ContentPage>
